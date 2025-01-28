@@ -19,7 +19,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Provides access to the attack-move command, which will make the actor automatically engage viable targets while moving to the destination.")]
-	class AttackMoveInfo : TraitInfo, Requires<IMoveInfo>
+	sealed class AttackMoveInfo : TraitInfo, Requires<IMoveInfo>
 	{
 		[VoiceReference]
 		public readonly string Voice = "Action";
@@ -53,7 +53,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new AttackMove(init.Self, this); }
 	}
 
-	class AttackMove : IResolveOrder, IOrderVoice
+	sealed class AttackMove : IResolveOrder, IOrderVoice
 	{
 		public readonly AttackMoveInfo Info;
 		readonly IMove move;
@@ -83,6 +83,9 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			if (order.OrderString == "AttackMove" || order.OrderString == "AssaultMove")
 			{
+				if (!order.Target.IsValidFor(self))
+					return;
+
 				var cell = self.World.Map.Clamp(self.World.Map.CellContaining(order.Target.CenterPosition));
 				if (!Info.MoveIntoShroud && !self.Owner.Shroud.IsExplored(cell))
 					return;

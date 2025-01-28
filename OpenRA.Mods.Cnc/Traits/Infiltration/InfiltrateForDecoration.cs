@@ -19,15 +19,18 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Cnc.Traits
 {
 	[Desc("Reveals a decoration sprite to the indicated players when infiltrated.")]
-	class InfiltrateForDecorationInfo : WithDecorationInfo
+	sealed class InfiltrateForDecorationInfo : WithDecorationInfo
 	{
 		[Desc("The `TargetTypes` from `Targetable` that are allowed to enter.")]
 		public readonly BitSet<TargetableType> Types = default;
 
+		[Desc("Experience to grant to the infiltrating player.")]
+		public readonly int PlayerExperience = 0;
+
 		public override object Create(ActorInitializer init) { return new InfiltrateForDecoration(init.Self, this); }
 	}
 
-	class InfiltrateForDecoration : WithDecoration, INotifyInfiltrated
+	sealed class InfiltrateForDecoration : WithDecoration, INotifyInfiltrated
 	{
 		readonly HashSet<Player> infiltrators = new();
 		readonly InfiltrateForDecorationInfo info;
@@ -42,6 +45,8 @@ namespace OpenRA.Mods.Cnc.Traits
 		{
 			if (!info.Types.Overlaps(types))
 				return;
+
+			infiltrator.Owner.PlayerActor.TraitOrDefault<PlayerExperience>()?.GiveExperience(info.PlayerExperience);
 
 			infiltrators.Add(infiltrator.Owner);
 		}

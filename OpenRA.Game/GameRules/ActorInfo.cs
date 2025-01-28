@@ -22,7 +22,7 @@ namespace OpenRA
 	/// </summary>
 	public class ActorInfo
 	{
-		public const string AbstractActorPrefix = "^";
+		public const char AbstractActorPrefix = '^';
 		public const char TraitInstanceSeparator = '@';
 
 		/// <summary>
@@ -33,7 +33,7 @@ namespace OpenRA
 		/// </summary>
 		public readonly string Name;
 		readonly TypeDictionary traits = new();
-		List<TraitInfo> constructOrderCache = null;
+		TraitInfo[] constructOrderCache = null;
 
 		public ActorInfo(ObjectCreator creator, string name, MiniYaml node)
 		{
@@ -130,6 +130,7 @@ namespace OpenRA
 
 			// Continue resolving traits as long as possible.
 			// Each time we resolve some traits, this means dependencies for other traits may then be possible to satisfy in the next pass.
+#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection
 			var readyToResolve = more.ToList();
 			while (readyToResolve.Count != 0)
 			{
@@ -138,29 +139,30 @@ namespace OpenRA
 				readyToResolve.Clear();
 				readyToResolve.AddRange(more);
 			}
+#pragma warning restore CA1851
 
 			if (unresolved.Count != 0)
 			{
-				var exceptionString = "ActorInfo(\"" + Name + "\") failed to initialize because of the following:\r\n";
+				var exceptionString = "ActorInfo(\"" + Name + "\") failed to initialize because of the following:\n";
 				var missing = unresolved.SelectMany(u => u.Dependencies.Where(d => !source.Any(s => AreResolvable(d, s.Type)))).Distinct();
 
-				exceptionString += "Missing:\r\n";
+				exceptionString += "Missing:\n";
 				foreach (var m in missing)
-					exceptionString += m + " \r\n";
+					exceptionString += m + " \n";
 
-				exceptionString += "Unresolved:\r\n";
+				exceptionString += "Unresolved:\n";
 				foreach (var u in unresolved)
 				{
 					var deps = u.Dependencies.Where(d => !resolved.Exists(r => r.Type == d));
 					var optDeps = u.OptionalDependencies.Where(d => !resolved.Exists(r => r.Type == d));
 					var allDeps = string.Join(", ", deps.Select(o => o.ToString()).Concat(optDeps.Select(o => $"[{o}]")));
-					exceptionString += $"{u.Type}: {{ {allDeps} }}\r\n";
+					exceptionString += $"{u.Type}: {{ {allDeps} }}\n";
 				}
 
 				throw new YamlException(exceptionString);
 			}
 
-			constructOrderCache = resolved.Select(r => r.Trait).ToList();
+			constructOrderCache = resolved.Select(r => r.Trait).ToArray();
 			return constructOrderCache;
 		}
 
@@ -185,7 +187,7 @@ namespace OpenRA
 		public bool HasTraitInfo<T>() where T : ITraitInfoInterface { return traits.Contains<T>(); }
 		public T TraitInfo<T>() where T : ITraitInfoInterface { return traits.Get<T>(); }
 		public T TraitInfoOrDefault<T>() where T : ITraitInfoInterface { return traits.GetOrDefault<T>(); }
-		public IEnumerable<T> TraitInfos<T>() where T : ITraitInfoInterface { return traits.WithInterface<T>(); }
+		public IReadOnlyCollection<T> TraitInfos<T>() where T : ITraitInfoInterface { return traits.WithInterface<T>(); }
 
 		public BitSet<TargetableType> GetAllTargetTypes()
 		{

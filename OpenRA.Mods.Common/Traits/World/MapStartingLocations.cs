@@ -25,11 +25,11 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		public readonly WDist InitialExploreRange = WDist.FromCells(5);
 
-		[TranslationReference]
+		[FluentReference]
 		[Desc("Descriptive label for the spawn positions checkbox in the lobby.")]
 		public readonly string SeparateTeamSpawnsCheckboxLabel = "checkbox-separate-team-spawns.label";
 
-		[TranslationReference]
+		[FluentReference]
 		[Desc("Tooltip description for the spawn positions checkbox in the lobby.")]
 		public readonly string SeparateTeamSpawnsCheckboxDescription = "checkbox-separate-team-spawns.description";
 
@@ -60,7 +60,7 @@ namespace OpenRA.Mods.Common.Traits
 				SeparateTeamSpawnsCheckboxLocked);
 		}
 
-		class AssignSpawnLocationsState
+		sealed class AssignSpawnLocationsState
 		{
 			public CPos[] SpawnLocations;
 			public List<int> AvailableSpawnPoints;

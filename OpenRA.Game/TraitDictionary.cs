@@ -39,7 +39,7 @@ namespace OpenRA
 	/// <summary>
 	/// Provides efficient ways to query a set of actors by their traits.
 	/// </summary>
-	class TraitDictionary
+	sealed class TraitDictionary
 	{
 		static readonly Func<Type, ITraitContainer> CreateTraitContainer = t =>
 			(ITraitContainer)typeof(TraitContainer<>).MakeGenericType(t).GetConstructor(Type.EmptyTypes).Invoke(null);
@@ -141,11 +141,10 @@ namespace OpenRA
 			int Queries { get; }
 		}
 
-		class TraitContainer<T> : ITraitContainer
+		sealed class TraitContainer<T> : ITraitContainer
 		{
 			readonly List<Actor> actors = new();
 			readonly List<T> traits = new();
-			readonly PerfTickLogger perfLogger = new();
 
 			public int Queries { get; private set; }
 
@@ -185,7 +184,7 @@ namespace OpenRA
 				return new MultipleEnumerable(this, actor);
 			}
 
-			class MultipleEnumerable : IEnumerable<T>
+			sealed class MultipleEnumerable : IEnumerable<T>
 			{
 				readonly TraitContainer<T> container;
 				readonly uint actor;
@@ -211,9 +210,9 @@ namespace OpenRA
 
 				public void Reset() { index = actors.BinarySearchMany(actor) - 1; }
 				public bool MoveNext() { return ++index < actors.Count && actors[index].ActorID == actor; }
-				public T Current => traits[index];
-				object System.Collections.IEnumerator.Current => Current;
-				public void Dispose() { }
+				public readonly T Current => traits[index];
+				readonly object System.Collections.IEnumerator.Current => Current;
+				public readonly void Dispose() { }
 			}
 
 			public IEnumerable<TraitPair<T>> All()
@@ -277,9 +276,9 @@ namespace OpenRA
 
 				public void Reset() { index = -1; }
 				public bool MoveNext() { return ++index < actors.Count; }
-				public TraitPair<T> Current => new(actors[index], traits[index]);
-				object System.Collections.IEnumerator.Current => Current;
-				public void Dispose() { }
+				public readonly TraitPair<T> Current => new(actors[index], traits[index]);
+				readonly object System.Collections.IEnumerator.Current => Current;
+				public readonly void Dispose() { }
 			}
 
 			public void RemoveActor(uint actor)
@@ -305,14 +304,14 @@ namespace OpenRA
 
 			public void ApplyToAllTimed(Action<Actor, T> action, string text)
 			{
-				perfLogger.Start();
+				var start = PerfTickLogger.GetTimestamp();
 				for (var i = 0; i < actors.Count; i++)
 				{
 					var actor = actors[i];
 					var trait = traits[i];
 					action(actor, trait);
 
-					perfLogger.LogTickAndRestartTimer(text, trait);
+					start = PerfTickLogger.LogLongTick(start, text, trait);
 				}
 			}
 		}

@@ -74,7 +74,7 @@ function Version-Command
 	if ($version -ne $null)
 	{
 		$version | out-file ".\VERSION"
-		$mods = @("mods/ra/mod.yaml", "mods/cnc/mod.yaml", "mods/d2k/mod.yaml", "mods/ts/mod.yaml", "mods/modcontent/mod.yaml", "mods/all/mod.yaml")
+		$mods = Get-ChildItem ./mods/*/mod.yaml | Select-Object -Expand FullName
 		foreach ($mod in $mods)
 		{
 			$replacement = (gc $mod) -Replace "Version:.*", ("Version: {0}" -f $version)
@@ -110,6 +110,13 @@ function Test-Command
 	InvokeCommand "$utilityPath ra --check-yaml"
 }
 
+function Tests-Command
+{
+	Write-Host "Running unit tests..." -ForegroundColor Cyan
+	dotnet build OpenRA.Test\OpenRA.Test.csproj -c Debug --nologo -p:TargetPlatform=win-x64
+	dotnet test bin\OpenRA.Test.dll --test-adapter-path:.
+}
+
 function Check-Command
 {
 	Write-Host "Compiling in Debug configuration..." -ForegroundColor Cyan
@@ -138,10 +145,6 @@ function Check-Scripts-Command
 	{
 		Write-Host "Testing Lua scripts..." -ForegroundColor Cyan
 		foreach ($script in ls "mods/*/maps/*/*.lua")
-		{
-			luac -p $script
-		}
-		foreach ($script in ls "lua/*.lua")
 		{
 			luac -p $script
 		}
@@ -257,6 +260,7 @@ switch ($execute)
 	{"version",       "v"  -contains $_} { Version-Command }
 	{"clean",         "c"  -contains $_} { Clean-Command }
 	{"test",          "t"  -contains $_} { Test-Command }
+	{"tests",         "ut" -contains $_} { Tests-Command }
 	{"check",         "ck" -contains $_} { Check-Command }
 	{"check-scripts", "cs" -contains $_} { Check-Scripts-Command }
 	Default { Write-Host ("Invalid command '{0}'" -f $command) }

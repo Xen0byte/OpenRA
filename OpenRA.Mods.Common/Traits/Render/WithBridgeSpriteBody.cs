@@ -10,14 +10,13 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Graphics;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits.Render
 {
-	class WithBridgeSpriteBodyInfo : WithSpriteBodyInfo
+	sealed class WithBridgeSpriteBodyInfo : WithSpriteBodyInfo
 	{
 		public readonly string Type = "GroundLevelBridge";
 
@@ -48,13 +47,13 @@ namespace OpenRA.Mods.Common.Traits.Render
 				yield break;
 
 			var anim = new Animation(init.World, image);
-			anim.PlayFetchIndex(RenderSprites.NormalizeSequence(anim, init.GetDamageState(), Sequences.First()), () => 0);
+			anim.PlayFetchIndex(RenderSprites.NormalizeSequence(anim, init.GetDamageState(), Sequences[0]), () => 0);
 
 			yield return new SpriteActorPreview(anim, () => WVec.Zero, () => 0, p);
 		}
 	}
 
-	class WithBridgeSpriteBody : WithSpriteBody, INotifyRemovedFromWorld
+	sealed class WithBridgeSpriteBody : WithSpriteBody, INotifyRemovedFromWorld
 	{
 		readonly WithBridgeSpriteBodyInfo bridgeInfo;
 		readonly BridgeLayer bridgeLayer;

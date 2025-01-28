@@ -19,18 +19,18 @@ namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.World)]
 	[Desc("Displays custom terrain types.")]
-	class CustomTerrainDebugOverlayInfo : TraitInfo
+	sealed class CustomTerrainDebugOverlayInfo : TraitInfo
 	{
 		public readonly string Font = "TinyBold";
 
 		public override object Create(ActorInitializer init) { return new CustomTerrainDebugOverlay(this); }
 	}
 
-	class CustomTerrainDebugOverlay : IWorldLoaded, IChatCommand, IRenderAnnotations
+	sealed class CustomTerrainDebugOverlay : IWorldLoaded, IChatCommand, IRenderAnnotations
 	{
 		const string CommandName = "custom-terrain";
 
-		[TranslationReference]
+		[FluentReference]
 		const string CommandDescription = "description-custom-terrain-debug-overlay";
 
 		public bool Enabled;

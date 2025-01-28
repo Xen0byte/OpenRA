@@ -42,6 +42,7 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Speech notification to play when a bridge is repaired.")]
 		public readonly string RepairNotification = null;
 
+		[FluentReference(optional: true)]
 		[Desc("Text notification to display when a bridge is repaired.")]
 		public readonly string RepairTextNotification = null;
 
@@ -110,12 +111,14 @@ namespace OpenRA.Mods.Common.Traits
 				else
 					return;
 
-				self.QueueActivity(order.Queued, new RepairBridge(self, order.Target, info.EnterBehaviour, info.RepairNotification, info.RepairTextNotification, info.TargetLineColor));
+				self.QueueActivity(
+					order.Queued,
+					new RepairBridge(self, order.Target, info.EnterBehaviour, info.RepairNotification, info.RepairTextNotification, info.TargetLineColor));
 				self.ShowTargetLines();
 			}
 		}
 
-		class RepairBridgeOrderTargeter : UnitOrderTargeter
+		sealed class RepairBridgeOrderTargeter : UnitOrderTargeter
 		{
 			readonly RepairsBridgesInfo info;
 

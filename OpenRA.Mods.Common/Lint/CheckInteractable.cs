@@ -16,7 +16,7 @@ using OpenRA.Server;
 
 namespace OpenRA.Mods.Common.Lint
 {
-	class CheckInteractable : ILintRulesPass, ILintServerMapPass
+	sealed class CheckInteractable : ILintRulesPass, ILintServerMapPass
 	{
 		void ILintRulesPass.Run(Action<string> emitError, Action<string> emitWarning, ModData modData, Ruleset rules)
 		{
@@ -28,7 +28,7 @@ namespace OpenRA.Mods.Common.Lint
 			Run(emitError, mapRules, modData);
 		}
 
-		void Run(Action<string> emitError, Ruleset rules, ModData modData)
+		static void Run(Action<string> emitError, Ruleset rules, ModData modData)
 		{
 			// As the map has not been created we need to get MapGrid info directly from manifest.
 			var grid = modData.Manifest.Get<MapGrid>();
@@ -42,14 +42,14 @@ namespace OpenRA.Mods.Common.Lint
 						continue;
 
 					if (HasInvalidBounds(interactable.Bounds, grid.TileSize, grid.TileScale))
-						emitError($"{nameof(interactable.Bounds)} of actor {actorInfo.Key} are empty or negative.");
+						emitError($"{actorInfo.Key}.{interactable.GetType().Name}.{nameof(interactable.Bounds)} are empty or negative.");
 
 					if (HasInvalidBounds(interactable.DecorationBounds, grid.TileSize, grid.TileScale))
-						emitError($"{nameof(interactable.DecorationBounds)} of actor {actorInfo.Key} are empty or negative.");
+						emitError($"{actorInfo.Key}.{interactable.GetType().Name}.{nameof(interactable.DecorationBounds)} are empty or negative.");
 				}
 				catch (InvalidOperationException e)
 				{
-					emitError($"{e.Message} (Actor type `{actorInfo.Key}`)");
+					emitError($"{e.Message} (Actor type `{actorInfo.Key}`).");
 				}
 			}
 		}

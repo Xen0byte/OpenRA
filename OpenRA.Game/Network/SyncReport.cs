@@ -19,7 +19,7 @@ using OpenRA.Primitives;
 
 namespace OpenRA.Network
 {
-	class SyncReport
+	sealed class SyncReport
 	{
 		const int NumSyncReports = 7;
 		static readonly Cache<Type, TypeInfo> TypeInfoCache = new(t => new TypeInfo(t));
@@ -122,7 +122,7 @@ namespace OpenRA.Network
 					Log.Write("sync", $"Player: {Game.Settings.Player.Name} ({Platform.CurrentPlatform} {Environment.OSVersion} {Platform.RuntimeVersion})");
 					if (Game.IsHost)
 						Log.Write("sync", "Player is host.");
-					Log.Write("sync", $"Game ID: {orderManager.LobbyInfo.GlobalSettings.GameUid} (Mod: {mod.Title} at Version {mod.Version})");
+					Log.Write("sync", $"Game ID: {orderManager.LobbyInfo.GlobalSettings.GameUid} (Mod: {mod.TitleTranslated} at Version {mod.Version})");
 					Log.Write("sync", $"Sync for net frame {r.Frame} -------------");
 					Log.Write("sync", $"SharedRandom: {r.SyncedRandom} (#{r.TotalCount})");
 					Log.Write("sync", "Synced Traits:");
@@ -161,7 +161,7 @@ namespace OpenRA.Network
 				Log.Write("sync", $"Recorded frames do not contain the frame {frame}. No sync report available!");
 		}
 
-		class Report
+		sealed class Report
 		{
 			public int Frame;
 			public int SyncedRandom;
@@ -201,8 +201,12 @@ namespace OpenRA.Network
 			public TypeInfo(Type type)
 			{
 				const BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-				var fields = type.GetFields(Flags).Where(fi => !fi.IsLiteral && !fi.IsStatic && fi.HasAttribute<SyncAttribute>());
-				var properties = type.GetProperties(Flags).Where(pi => pi.HasAttribute<SyncAttribute>());
+				var fields = type.GetFields(Flags)
+					.Where(fi => !fi.IsLiteral && !fi.IsStatic && fi.HasAttribute<SyncAttribute>())
+					.ToList();
+				var properties = type.GetProperties(Flags)
+					.Where(pi => pi.HasAttribute<SyncAttribute>())
+					.ToList();
 
 				foreach (var prop in properties)
 					if (!prop.CanRead || prop.GetIndexParameters().Length > 0)
@@ -300,7 +304,7 @@ namespace OpenRA.Network
 
 			public object this[int index]
 			{
-				get
+				readonly get
 				{
 					if (item2OrSentinel == Sentinel)
 						return ((object[])item1OrArray)[index];

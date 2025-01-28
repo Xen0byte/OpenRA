@@ -27,8 +27,6 @@ namespace OpenRA.Platforms.Default
 			return defaultDevices;
 		}
 
-		public DummySoundEngine() { }
-
 		public ISoundSource AddSoundSourceFromMemory(byte[] data, int channels, int sampleBits, int sampleRate)
 		{
 			return new NullSoundSource();
@@ -61,12 +59,12 @@ namespace OpenRA.Platforms.Default
 		public void Dispose() { }
 	}
 
-	class NullSoundSource : ISoundSource
+	sealed class NullSoundSource : ISoundSource
 	{
 		public void Dispose() { }
 	}
 
-	class NullSound : ISound
+	sealed class NullSound : ISound
 	{
 		public float Volume { get; set; }
 		public float SeekPosition => 0;

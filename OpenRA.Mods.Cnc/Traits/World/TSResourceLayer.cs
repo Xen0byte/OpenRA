@@ -19,18 +19,18 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Cnc.Traits
 {
 	[TraitLocation(SystemActors.World)]
-	class TSResourceLayerInfo : ResourceLayerInfo
+	sealed class TSResourceLayerInfo : ResourceLayerInfo
 	{
 		public readonly string VeinType = "Veins";
 
 		[ActorReference]
 		[Desc("Actor types that should be treated as veins for adjacency.")]
-		public readonly HashSet<string> VeinholeActors = new() { };
+		public readonly HashSet<string> VeinholeActors = new();
 
 		public override object Create(ActorInitializer init) { return new TSResourceLayer(init.Self, this); }
 	}
 
-	class TSResourceLayer : ResourceLayer, INotifyActorDisposing
+	sealed class TSResourceLayer : ResourceLayer, INotifyActorDisposing
 	{
 		readonly TSResourceLayerInfo info;
 		readonly HashSet<CPos> veinholeCells = new();

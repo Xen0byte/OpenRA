@@ -110,7 +110,7 @@ namespace OpenRA.Mods.Common.Activities
 					Game.Sound.PlayToPlayer(SoundType.World, self.Owner, s, self.CenterPosition);
 
 				Game.Sound.PlayNotification(self.World.Map.Rules, self.Owner, "Speech", Notification, self.Owner.Faction.InternalName);
-				TextNotificationsManager.AddTransientLine(TextNotification, self.Owner);
+				TextNotificationsManager.AddTransientLine(self.Owner, TextNotification);
 
 				var init = new TypeDictionary
 				{
@@ -162,7 +162,7 @@ namespace OpenRA.Mods.Common.Activities
 		}
 	}
 
-	class IssueOrderAfterTransform : Activity
+	sealed class IssueOrderAfterTransform : Activity
 	{
 		readonly string orderString;
 		readonly Target target;

@@ -68,7 +68,7 @@ namespace OpenRA.Server
 			ticksPerInterval = Interval / timestep;
 
 			this.players = players.ToList();
-			baselinePlayer = this.players.First();
+			baselinePlayer = this.players[0];
 
 			foreach (var player in this.players)
 			{
@@ -112,7 +112,7 @@ namespace OpenRA.Server
 			}
 		}
 
-		long Median(long[] a)
+		static long Median(long[] a)
 		{
 			Array.Sort(a);
 			var n = a.Length;
@@ -128,7 +128,7 @@ namespace OpenRA.Server
 			players.Remove(player);
 			if (player == baselinePlayer && players.Count > 0)
 			{
-				var newBaseline = players.First();
+				var newBaseline = players[0];
 				Interlocked.Exchange(ref baselinePlayer, newBaseline);
 			}
 

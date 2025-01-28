@@ -35,7 +35,7 @@ namespace OpenRA.Mods.Common.Traits
 
 	public sealed class TerrainLighting : ITerrainLighting
 	{
-		class LightSource
+		sealed class LightSource
 		{
 			public readonly WPos Pos;
 			public readonly CPos Cell;
@@ -75,7 +75,7 @@ namespace OpenRA.Mods.Common.Traits
 				info.BinSize * tileScale);
 		}
 
-		Rectangle Bounds(LightSource source)
+		static Rectangle Bounds(LightSource source)
 		{
 			var c = source.Pos;
 			var r = source.Range.Length;

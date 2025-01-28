@@ -27,7 +27,7 @@ namespace OpenRA.Graphics
 
 		float deviceScale;
 
-		public SpriteFont(string name, byte[] data, int size, int ascender, float scale, SheetBuilder builder)
+		public SpriteFont(IPlatform platform, string name, byte[] data, int size, int ascender, float scale, SheetBuilder builder)
 		{
 			if (builder.Type != SheetType.BGRA)
 				throw new ArgumentException("The sheet builder must create BGRA sheets.", nameof(builder));
@@ -36,7 +36,7 @@ namespace OpenRA.Graphics
 			this.size = size;
 			this.builder = builder;
 
-			font = Game.Renderer.CreateFont(data);
+			font = platform.CreateFont(data);
 			glyphs = new Cache<char, GlyphInfo>(CreateGlyph);
 			contrastGlyphs = new Cache<(char, int), Sprite>(CreateContrastGlyph);
 			dilationElements = new Cache<int, float[]>(CreateCircularWeightMap);
@@ -123,7 +123,7 @@ namespace OpenRA.Graphics
 			}
 		}
 
-		float2 Rotate(float2 v, float sina, float cosa, float2 offset)
+		static float2 Rotate(float2 v, float sina, float cosa, float2 offset)
 		{
 			return new float2(
 				v.X * cosa - v.Y * sina + offset.X,
@@ -427,7 +427,7 @@ namespace OpenRA.Graphics
 		}
 	}
 
-	class GlyphInfo
+	sealed class GlyphInfo
 	{
 		public float Advance;
 		public int2 Offset;

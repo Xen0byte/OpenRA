@@ -35,7 +35,7 @@ namespace OpenRA.Mods.Common.Activities
 			}
 			catch (Exception ex)
 			{
-				context.FatalError(ex.Message);
+				context.FatalError(ex);
 			}
 
 			Dispose();
@@ -46,7 +46,6 @@ namespace OpenRA.Mods.Common.Activities
 		{
 			base.Cancel(self, keepQueue);
 			Dispose();
-			return;
 		}
 
 		public void Dispose()

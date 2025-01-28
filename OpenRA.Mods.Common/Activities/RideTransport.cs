@@ -15,7 +15,7 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Activities
 {
-	class RideTransport : Enter
+	sealed class RideTransport : Enter
 	{
 		readonly Passenger passenger;
 
@@ -37,7 +37,7 @@ namespace OpenRA.Mods.Common.Activities
 
 			// Make sure we can still enter the transport
 			// (but not before, because this may stop the actor in the middle of nowhere)
-			if (enterCargo == null || !passenger.Reserve(self, enterCargo))
+			if (enterCargo == null || enterCargo.IsTraitDisabled || !passenger.Reserve(self, enterCargo))
 			{
 				Cancel(self, true);
 				return false;
@@ -47,6 +47,12 @@ namespace OpenRA.Mods.Common.Activities
 				return false;
 
 			return true;
+		}
+
+		protected override void TickInner(Actor self, in Target target, bool targetIsDeadOrHiddenActor)
+		{
+			if (enterCargo != null && enterCargo.IsTraitDisabled)
+				Cancel(self, true);
 		}
 
 		protected override void OnEnterComplete(Actor self, Actor targetActor)
@@ -63,6 +69,9 @@ namespace OpenRA.Mods.Common.Activities
 
 				if (!enterCargo.CanLoad(self))
 					return;
+
+				foreach (var inl in targetActor.TraitsImplementing<INotifyLoadCargo>())
+					inl.Loading(self);
 
 				enterCargo.Load(enterActor, self);
 				w.Remove(self);

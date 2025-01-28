@@ -60,7 +60,7 @@ namespace OpenRA.Mods.Common.Graphics
 			}
 		}
 
-		void DrawSelectionBar(float2 start, float2 end, float value, Color barColor)
+		static void DrawSelectionBar(float2 start, float2 end, float value, Color barColor)
 		{
 			var c = Color.FromArgb(128, 30, 30, 30);
 			var c2 = Color.FromArgb(128, 10, 10, 10);
@@ -81,16 +81,13 @@ namespace OpenRA.Mods.Common.Graphics
 			cr.DrawLine(start + r, z + r, 1, barColor2);
 		}
 
-		Color GetHealthColor(IHealth health)
+		static Color GetHealthColor(IHealth health)
 		{
-			if (Game.Settings.Game.UsePlayerStanceColors)
-				return actor.Owner.PlayerRelationshipColor(actor);
-
 			return health.DamageState == DamageState.Critical ? Color.Red :
 				health.DamageState == DamageState.Heavy ? Color.Yellow : Color.LimeGreen;
 		}
 
-		void DrawHealthBar(IHealth health, float2 start, float2 end)
+		static void DrawHealthBar(IHealth health, float2 start, float2 end)
 		{
 			if (health == null || health.IsDead)
 				return;

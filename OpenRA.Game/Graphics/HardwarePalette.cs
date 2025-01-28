@@ -79,10 +79,16 @@ namespace OpenRA.Graphics
 				CopyPaletteToBuffer(index, p);
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage(
+			"Performance", "CA1854:Prefer the 'IDictionary.TryGetValue(TKey, out TValue)' method",
+			Justification = "False positive - indexer is a set not a get.")]
 		public void ReplacePalette(string name, IPalette p)
 		{
 			if (mutablePalettes.ContainsKey(name))
+			{
+				palettes[name] = new ImmutablePalette(p);
 				CopyPaletteToBuffer(indices[name], mutablePalettes[name] = new MutablePalette(p));
+			}
 			else if (palettes.ContainsKey(name))
 				CopyPaletteToBuffer(indices[name], palettes[name] = new ImmutablePalette(p));
 			else

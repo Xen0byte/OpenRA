@@ -10,11 +10,12 @@
 #endregion
 
 using OpenRA.Primitives;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("This actor is crushable.")]
-	class CrushableInfo : ConditionalTraitInfo
+	sealed class CrushableInfo : ConditionalTraitInfo
 	{
 		[Desc("Sound to play when being crushed.")]
 		public readonly string CrushSound = null;
@@ -28,7 +29,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new Crushable(init.Self, this); }
 	}
 
-	class Crushable : ConditionalTrait<CrushableInfo>, ICrushable, INotifyCrushed
+	sealed class Crushable : ConditionalTrait<CrushableInfo>, ICrushable, INotifyCrushed
 	{
 		readonly Actor self;
 
@@ -45,7 +46,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			var mobile = self.TraitOrDefault<Mobile>();
 			if (mobile != null && self.World.SharedRandom.Next(100) <= Info.WarnProbability)
-				mobile.Nudge(crusher);
+				self.QueueActivity(false, new Nudge(crusher));
 		}
 
 		void INotifyCrushed.OnCrush(Actor self, Actor crusher, BitSet<CrushClass> crushClasses)

@@ -20,7 +20,7 @@ namespace OpenRA.Mods.Cnc.Traits
 {
 	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
 	[Desc("Adds the hard-coded shroud palette to the game")]
-	class ShroudPaletteInfo : TraitInfo
+	sealed class ShroudPaletteInfo : TraitInfo
 	{
 		[PaletteDefinition]
 		[FieldLoader.Require]
@@ -33,7 +33,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		public override object Create(ActorInitializer init) { return new ShroudPalette(this); }
 	}
 
-	class ShroudPalette : ILoadsPalettes, IProvidesAssetBrowserPalettes
+	sealed class ShroudPalette : ILoadsPalettes, IProvidesAssetBrowserPalettes
 	{
 		readonly ShroudPaletteInfo info;
 
@@ -42,7 +42,7 @@ namespace OpenRA.Mods.Cnc.Traits
 		public void LoadPalettes(WorldRenderer wr)
 		{
 			var c = info.Fog ? Fog : Shroud;
-			wr.AddPalette(info.Name, new ImmutablePalette(Enumerable.Range(0, Palette.Size).Select(i => (uint)c[i % 8].ToArgb())));
+			wr.AddPalette(info.Name, new ImmutablePalette(Enumerable.Range(0, Palette.Size).Select(i => c[i % 8].ToArgb())));
 		}
 
 		static readonly Color[] Fog = new[]

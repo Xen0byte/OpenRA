@@ -84,7 +84,7 @@ namespace OpenRA
 
 		public MiniYaml Save(Func<ActorInit, bool> initFilter = null)
 		{
-			var ret = new MiniYaml(Type);
+			var nodes = new List<MiniYamlNode>();
 			foreach (var o in initDict.Value)
 			{
 				if (o is not ActorInit init || o is ISuppressInitExport)
@@ -98,10 +98,10 @@ namespace OpenRA
 				if (!string.IsNullOrEmpty(init.InstanceName))
 					initName += ActorInfo.TraitInstanceSeparator + init.InstanceName;
 
-				ret.Nodes.Add(new MiniYamlNode(initName, init.Save()));
+				nodes.Add(new MiniYamlNode(initName, init.Save()));
 			}
 
-			return ret;
+			return new MiniYaml(Type, nodes);
 		}
 
 		public IEnumerator<object> GetEnumerator() { return initDict.Value.GetEnumerator(); }
@@ -139,7 +139,7 @@ namespace OpenRA
 			return removed;
 		}
 
-		public IEnumerable<T> GetAll<T>() where T : ActorInit
+		public IReadOnlyCollection<T> GetAll<T>() where T : ActorInit
 		{
 			return initDict.Value.WithInterface<T>();
 		}
@@ -152,8 +152,9 @@ namespace OpenRA
 			// If a more specific init is not available, fall back to an unnamed init.
 			// If duplicate inits are defined, take the last to match standard yaml override expectations
 			if (info != null && !string.IsNullOrEmpty(info.InstanceName))
-				return inits.LastOrDefault(i => i.InstanceName == info.InstanceName) ??
-				       inits.LastOrDefault(i => string.IsNullOrEmpty(i.InstanceName));
+				return
+					inits.LastOrDefault(i => i.InstanceName == info.InstanceName) ??
+					inits.LastOrDefault(i => string.IsNullOrEmpty(i.InstanceName));
 
 			// Untagged traits will only use untagged inits
 			return inits.LastOrDefault(i => string.IsNullOrEmpty(i.InstanceName));

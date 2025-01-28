@@ -16,7 +16,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits.Render
 {
 	[Desc("Visualizes the remaining build time of actor produced here.")]
-	class ProductionBarInfo : ConditionalTraitInfo, Requires<ProductionInfo>, IRulesetLoaded
+	sealed class ProductionBarInfo : ConditionalTraitInfo, Requires<ProductionInfo>, IRulesetLoaded
 	{
 		[FieldLoader.Require]
 		[Desc("Production queue type, for actors with multiple queues.")]
@@ -41,7 +41,7 @@ namespace OpenRA.Mods.Common.Traits.Render
 		public override object Create(ActorInitializer init) { return new ProductionBar(init.Self, this); }
 	}
 
-	class ProductionBar : ConditionalTrait<ProductionBarInfo>, ISelectionBar, ITick, INotifyOwnerChanged
+	sealed class ProductionBar : ConditionalTrait<ProductionBarInfo>, ISelectionBar, ITick, INotifyOwnerChanged
 	{
 		readonly Actor self;
 		ProductionQueue queue;
@@ -77,7 +77,12 @@ namespace OpenRA.Mods.Common.Traits.Render
 				return;
 
 			var current = queue.AllQueued().Where(i => i.Started).MinByOrDefault(i => i.RemainingTime);
-			value = current != null ? 1 - (float)current.RemainingCost / current.TotalCost : 0;
+			if (current == null)
+				value = 0;
+			else if (current.TotalCost <= 0)
+				value = 1;
+			else
+				value = 1 - (float)current.RemainingCost / current.TotalCost;
 		}
 
 		float ISelectionBar.GetValue()

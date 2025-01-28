@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using OpenRA.Graphics;
 using OpenRA.Traits;
@@ -17,7 +18,7 @@ namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
 	[Desc("Palette effect used for sprinkle \"animations\".")]
-	class RotationPaletteEffectInfo : TraitInfo
+	sealed class RotationPaletteEffectInfo : TraitInfo
 	{
 		[Desc("Defines to which palettes this effect should be applied to.",
 			"If none specified, it applies to all palettes not explicitly excluded.")]
@@ -45,7 +46,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new RotationPaletteEffect(init.World, this); }
 	}
 
-	class RotationPaletteEffect : ITick, IPaletteModifier
+	sealed class RotationPaletteEffect : ITick, IPaletteModifier
 	{
 		readonly RotationPaletteEffectInfo info;
 		readonly uint[] rotationBuffer;
@@ -110,7 +111,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			// PERF: Avoid LINQ.
 			foreach (var pref in prefixes)
-				if (name.StartsWith(pref))
+				if (name.StartsWith(pref, StringComparison.Ordinal))
 					return true;
 
 			return false;

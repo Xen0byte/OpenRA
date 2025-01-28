@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System;
 using System.Linq;
 using Eluant;
 using OpenRA.Mods.Common.Traits;
@@ -36,26 +37,28 @@ namespace OpenRA.Mods.Common.Scripting
 		}
 
 		[Desc("Returns a table of all actors within the requested region, filtered using the specified function.")]
-		public Actor[] ActorsInCircle(WPos location, WDist radius, LuaFunction filter = null)
+		public Actor[] ActorsInCircle(WPos location, WDist radius, [ScriptEmmyTypeOverride("fun(a: actor):boolean")] LuaFunction filter = null)
 		{
 			var actors = Context.World.FindActorsInCircle(location, radius);
 			return FilteredObjects(actors, filter).ToArray();
 		}
 
 		[Desc("Returns a table of all actors within the requested rectangle, filtered using the specified function.")]
-		public Actor[] ActorsInBox(WPos topLeft, WPos bottomRight, LuaFunction filter = null)
+		public Actor[] ActorsInBox(WPos topLeft, WPos bottomRight, [ScriptEmmyTypeOverride("fun(a: actor):boolean")] LuaFunction filter = null)
 		{
 			var actors = Context.World.ActorMap.ActorsInBox(topLeft, bottomRight);
 			return FilteredObjects(actors, filter).ToArray();
 		}
 
-		// HACK: This api method abuses the coordinate system, and should be removed
+		// HACK: This API method abuses the coordinate system, and should be removed
 		// in favour of proper actor queries.  See #8549.
+		[Obsolete("This function will be removed in future versions. Use Map.ActorsInWorld instead.")]
 		[Desc("Returns the location of the top-left corner of the map (assuming zero terrain height).")]
 		public WPos TopLeft => Context.World.Map.ProjectedTopLeft;
 
-		// HACK: This api method abuses the coordinate system, and should be removed
+		// HACK: This API method abuses the coordinate system, and should be removed
 		// in favour of proper actor queries.  See #8549.
+		[Obsolete("This function will be removed in future versions. Use Map.ActorsInWorld instead.")]
 		[Desc("Returns the location of the bottom-right corner of the map (assuming zero terrain height).")]
 		public WPos BottomRight => Context.World.Map.ProjectedBottomRight;
 
@@ -78,8 +81,8 @@ namespace OpenRA.Mods.Common.Scripting
 		}
 
 		[Desc("Returns the first cell on the visible border of the map from the given cell,",
-			"matching the filter function called as function(CPos cell).")]
-		public CPos ClosestMatchingEdgeCell(CPos givenCell, LuaFunction filter)
+			"matching the filter function called as function(cell: cpos):boolean.")]
+		public CPos ClosestMatchingEdgeCell(CPos givenCell, [ScriptEmmyTypeOverride("fun(cell: cpos):boolean")] LuaFunction filter)
 		{
 			return FilteredObjects(Context.World.Map.AllEdgeCells.OrderBy(c => (givenCell - c).Length), filter).FirstOrDefault();
 		}
@@ -103,7 +106,7 @@ namespace OpenRA.Mods.Common.Scripting
 		public bool IsPausedShellmap => Context.World.Type == WorldType.Shellmap && gameSettings.PauseShellmap;
 
 		[Desc("Returns the value of a `" + nameof(ScriptLobbyDropdown) + "` selected in the game lobby.")]
-		public LuaValue LobbyOption(string id)
+		public string LobbyOption(string id)
 		{
 			var option = Context.World.WorldActor.TraitsImplementing<ScriptLobbyDropdown>()
 				.FirstOrDefault(sld => sld.Info.ID == id);
@@ -117,11 +120,23 @@ namespace OpenRA.Mods.Common.Scripting
 			return option.Value;
 		}
 
+		[Desc("Returns the value of a `" + nameof(ScriptLobbyDropdown) + "` selected in the game lobby or fallback to a default value.")]
+		public string LobbyOptionOrDefault(string id, string fallback)
+		{
+			var option = Context.World.WorldActor.TraitsImplementing<ScriptLobbyDropdown>()
+				.FirstOrDefault(sld => sld.Info.ID == id);
+
+			if (option == null)
+				return fallback;
+
+			return option.Value;
+		}
+
 		[Desc("Returns a table of all the actors that were specified in the map file.")]
 		public Actor[] NamedActors => sma.Actors.Values.ToArray();
 
 		[Desc("Returns the actor that was specified with a given name in " +
-		      "the map file (or nil, if the actor is dead or not found).")]
+			"the map file (or nil, if the actor is dead or not found).")]
 		public Actor NamedActor(string actorName)
 		{
 			if (!sma.Actors.TryGetValue(actorName, out var ret))

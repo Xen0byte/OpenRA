@@ -7,14 +7,14 @@
    information, see COPYING.
 ]]
 
-Difficulty = Map.LobbyOption("difficulty")
+Difficulty = Map.LobbyOptionOrDefault("difficulty", "normal")
 
 InitObjectives = function(player)
 	Trigger.OnObjectiveCompleted(player, function(p, id)
-		Media.DisplayMessage(p.GetObjectiveDescription(id), UserInterface.Translate("objective-completed"))
+		Media.DisplayMessage(p.GetObjectiveDescription(id), UserInterface.GetFluentMessage("objective-completed"))
 	end)
 	Trigger.OnObjectiveFailed(player, function(p, id)
-		Media.DisplayMessage(p.GetObjectiveDescription(id), UserInterface.Translate("objective-failed"))
+		Media.DisplayMessage(p.GetObjectiveDescription(id), UserInterface.GetFluentMessage("objective-failed"))
 	end)
 
 	Trigger.OnPlayerLost(player, function()
@@ -31,7 +31,12 @@ end
 
 ReinforceWithLandingCraft = function(player, units, transportStart, transportUnload, rallypoint)
 	local transport = Actor.Create("lst", true, { Owner = player, Facing = Angle.North, Location = transportStart })
-	local subcell = 0
+	local subcell = 1
+
+	if #units == 1 then
+		subcell = 0
+	end
+
 	Utils.Do(units, function(a)
 		transport.LoadPassenger(Actor.Create(a, false, { Owner = transport.Owner, Facing = transport.Facing, Location = transportUnload, SubCell = subcell }))
 		subcell = subcell + 1

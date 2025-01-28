@@ -22,8 +22,8 @@ namespace OpenRA.Mods.Common.FileFormats
 {
 	public static class Blast
 	{
-		public static readonly int MAXBITS = 13; // maximum code length
-		public static readonly int MAXWIN = 4096; // maximum window size
+		public const int MAXBITS = 13; // maximum code length
+		public const int MAXWIN = 4096; // maximum window size
 
 		static readonly byte[] LitLen =
 		{
@@ -200,7 +200,7 @@ namespace OpenRA.Mods.Common.FileFormats
 		}
 	}
 
-	class BitReader
+	sealed class BitReader
 	{
 		readonly Stream stream;
 		byte bitBuffer = 0;
@@ -214,8 +214,7 @@ namespace OpenRA.Mods.Common.FileFormats
 		public int ReadBits(int count)
 		{
 			var ret = 0;
-			var filled = 0;
-			while (filled < count)
+			for (var filled = 0; filled < count; filled++)
 			{
 				if (bitCount == 0)
 				{
@@ -226,7 +225,6 @@ namespace OpenRA.Mods.Common.FileFormats
 				ret |= (bitBuffer & 1) << filled;
 				bitBuffer >>= 1;
 				bitCount--;
-				filled++;
 			}
 
 			return ret;
@@ -242,7 +240,7 @@ namespace OpenRA.Mods.Common.FileFormats
 	 * codes.  Those tables are the number of codes of each length, and the symbols
 	 * sorted by length, retaining their original order within each length.
 	 */
-	class Huffman
+	sealed class Huffman
 	{
 		public short[] Count; // number of symbols of each length
 		public short[] Symbol; // canonically ordered symbols

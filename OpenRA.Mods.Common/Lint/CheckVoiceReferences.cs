@@ -29,7 +29,7 @@ namespace OpenRA.Mods.Common.Lint
 			Run(emitError, mapRules);
 		}
 
-		void Run(Action<string> emitError, Ruleset rules)
+		static void Run(Action<string> emitError, Ruleset rules)
 		{
 			foreach (var actorInfo in rules.Actors)
 			{
@@ -51,7 +51,7 @@ namespace OpenRA.Mods.Common.Lint
 			}
 		}
 
-		void CheckVoices(ActorInfo actorInfo, Action<string> emitError, Ruleset rules, string voiceSet)
+		static void CheckVoices(ActorInfo actorInfo, Action<string> emitError, Ruleset rules, string voiceSet)
 		{
 			var soundInfo = rules.Voices[voiceSet.ToLowerInvariant()];
 
@@ -67,7 +67,7 @@ namespace OpenRA.Mods.Common.Lint
 							continue;
 
 						if (!soundInfo.Voices.ContainsKey(voice))
-							emitError($"Actor {actorInfo.Name} using voice set {voiceSet} does not define {voice} voice required by {traitInfo}.");
+							emitError($"Actor `{actorInfo.Name}` using voice set `{voiceSet}` does not define `{voice}` voice required by `{traitInfo}`.");
 					}
 				}
 			}

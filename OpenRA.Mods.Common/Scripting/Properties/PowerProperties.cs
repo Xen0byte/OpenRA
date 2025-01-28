@@ -35,13 +35,20 @@ namespace OpenRA.Mods.Common.Scripting
 		public int PowerDrained => pm.PowerDrained;
 
 		[Desc("Returns the player's power state " +
-		      "(\"Normal\", \"Low\" or \"Critical\").")]
+			"(\"Normal\", \"Low\" or \"Critical\").")]
 		public string PowerState => pm.PowerState.ToString();
 
 		[Desc("Triggers low power for the chosen amount of ticks.")]
 		public void TriggerPowerOutage(int ticks)
 		{
 			pm.TriggerPowerOutage(ticks);
+		}
+
+		[Desc("Whether the player should receive a notification when low on power.")]
+		public bool PlayLowPowerNotification
+		{
+			get => pm.PlayLowPowerNotification;
+			set => pm.PlayLowPowerNotification = value;
 		}
 	}
 

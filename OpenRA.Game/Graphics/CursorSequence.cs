@@ -27,19 +27,20 @@ namespace OpenRA.Graphics
 		{
 			var d = info.ToDictionary();
 
-			Start = Exts.ParseIntegerInvariant(d["Start"].Value);
+			Start = Exts.ParseInt32Invariant(d["Start"].Value);
 			Palette = palette;
 			Name = name;
 
 			var cursorSprites = cache[cursorSrc];
 			Frames = cursorSprites.Skip(Start).ToArray();
 
-			if ((d.ContainsKey("Length") && d["Length"].Value == "*") || (d.ContainsKey("End") && d["End"].Value == "*"))
+			if ((d.TryGetValue("Length", out var yaml) && yaml.Value == "*") ||
+				(d.TryGetValue("End", out yaml) && yaml.Value == "*"))
 				Length = Frames.Length;
-			else if (d.ContainsKey("Length"))
-				Length = Exts.ParseIntegerInvariant(d["Length"].Value);
-			else if (d.ContainsKey("End"))
-				Length = Exts.ParseIntegerInvariant(d["End"].Value) - Start;
+			else if (d.TryGetValue("Length", out yaml))
+				Length = Exts.ParseInt32Invariant(yaml.Value);
+			else if (d.TryGetValue("End", out yaml))
+				Length = Exts.ParseInt32Invariant(yaml.Value) - Start;
 			else
 				Length = 1;
 
@@ -51,15 +52,15 @@ namespace OpenRA.Graphics
 			if (Length > cursorSprites.Length)
 				throw new YamlException($"Cursor {name}: {nameof(Length)} is greater than the length of the sprite sequence.");
 
-			if (d.ContainsKey("X"))
+			if (d.TryGetValue("X", out yaml))
 			{
-				Exts.TryParseIntegerInvariant(d["X"].Value, out var x);
+				Exts.TryParseInt32Invariant(yaml.Value, out var x);
 				Hotspot = Hotspot.WithX(x);
 			}
 
-			if (d.ContainsKey("Y"))
+			if (d.TryGetValue("Y", out yaml))
 			{
-				Exts.TryParseIntegerInvariant(d["Y"].Value, out var y);
+				Exts.TryParseInt32Invariant(yaml.Value, out var y);
 				Hotspot = Hotspot.WithY(y);
 			}
 		}

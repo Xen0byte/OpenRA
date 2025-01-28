@@ -35,6 +35,9 @@ namespace OpenRA
 
 	public sealed class Actor : IScriptBindable, IScriptNotifyBind, ILuaTableBinding, ILuaEqualityBinding, ILuaToStringBinding, IEquatable<Actor>, IDisposable
 	{
+		/// <summary>Value used to represent an invalid token.</summary>
+		public const int InvalidConditionToken = -1;
+
 		internal readonly struct SyncHash
 		{
 			public readonly ISync Trait;
@@ -68,7 +71,12 @@ namespace OpenRA
 		public IEffectiveOwner EffectiveOwner { get; }
 		public IOccupySpace OccupiesSpace { get; }
 		public ITargetable[] Targetables { get; }
-		public IEnumerable<ITargetablePositions> EnabledTargetablePositions { get; private set; }
+		public IEnumerable<ITargetablePositions> EnabledTargetablePositions { get; }
+		readonly ICrushable[] crushables;
+		public ICrushable[] Crushables
+		{
+			get => crushables ?? throw new InvalidOperationException($"Crushables for {Info.Name} are not initialized.");
+		}
 
 		public bool IsIdle => CurrentActivity == null;
 		public bool IsDead => Disposed || (health != null && health.IsDead);
@@ -78,10 +86,7 @@ namespace OpenRA
 
 		public WRot Orientation => facing?.Orientation ?? WRot.None;
 
-		/// <summary>Value used to represent an invalid token.</summary>
-		public static readonly int InvalidConditionToken = -1;
-
-		class ConditionState
+		sealed class ConditionState
 		{
 			/// <summary>Delegates that have registered to be notified when this condition changes.</summary>
 			public readonly List<VariableObserverNotifier> Notifiers = new();
@@ -155,6 +160,7 @@ namespace OpenRA
 				var targetablesList = new List<ITargetable>();
 				var targetablePositionsList = new List<ITargetablePositions>();
 				var syncHashesList = new List<SyncHash>();
+				var crushablesList = new List<ICrushable>();
 
 				foreach (var traitInfo in Info.TraitsInConstructOrder())
 				{
@@ -181,6 +187,7 @@ namespace OpenRA
 					{ if (trait is ITargetable t) targetablesList.Add(t); }
 					{ if (trait is ITargetablePositions t) targetablePositionsList.Add(t); }
 					{ if (trait is ISync t) syncHashesList.Add(new SyncHash(t)); }
+					{ if (trait is ICrushable t) crushablesList.Add(t); }
 				}
 
 				resolveOrders = resolveOrdersList.ToArray();
@@ -195,6 +202,7 @@ namespace OpenRA
 				EnabledTargetablePositions = targetablePositions.Where(Exts.IsTraitEnabled);
 				enabledTargetableWorldPositions = EnabledTargetablePositions.SelectMany(tp => tp.TargetablePositions(this));
 				SyncHashes = syncHashesList.ToArray();
+				crushables = crushablesList.ToArray();
 			}
 		}
 

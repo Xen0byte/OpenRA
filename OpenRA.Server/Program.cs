@@ -11,21 +11,28 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading;
 using OpenRA.Network;
-using OpenRA.Support;
 
 namespace OpenRA.Server
 {
-	class Program
+	sealed class Program
 	{
 		static void Main(string[] args)
 		{
 			try
 			{
 				Run(args);
+			}
+			catch
+			{
+				// Flush logs before rethrowing, i.e. allowing the exception to go unhandled.
+				// try-finally won't work - an unhandled exception kills our process without running the finally block!
+				Log.Dispose();
+				throw;
 			}
 			finally
 			{
@@ -86,9 +93,7 @@ namespace OpenRA.Server
 				modData.MapCache.LoadPreviewImages = false; // PERF: Server doesn't need previews, save memory by not loading them.
 				modData.MapCache.LoadMaps();
 
-				settings.Map = modData.MapCache.ChooseInitialMap(settings.Map, new MersenneTwister());
-
-				var endpoints = new List<IPEndPoint> { new IPEndPoint(IPAddress.IPv6Any, settings.ListenPort), new IPEndPoint(IPAddress.Any, settings.ListenPort) };
+				var endpoints = new List<IPEndPoint> { new(IPAddress.IPv6Any, settings.ListenPort), new(IPAddress.Any, settings.ListenPort) };
 				var server = new Server(endpoints, settings, modData, ServerType.Dedicated);
 
 				GC.Collect();
@@ -110,7 +115,7 @@ namespace OpenRA.Server
 
 		static void WriteLineWithTimeStamp(string line)
 		{
-			Console.WriteLine($"[{DateTime.Now.ToString(Game.Settings.Server.TimestampFormat)}] {line}");
+			Console.WriteLine($"[{DateTime.Now.ToString(Game.Settings.Server.TimestampFormat, CultureInfo.CurrentCulture)}] {line}");
 		}
 	}
 }

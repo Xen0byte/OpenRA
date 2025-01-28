@@ -47,9 +47,20 @@ function makelauncher()
 	MOD_ID="${3}"
 	PLATFORM="${4}"
 
-	convert "${ARTWORK_DIR}/${MOD_ID}_16x16.png" "${ARTWORK_DIR}/${MOD_ID}_24x24.png" "${ARTWORK_DIR}/${MOD_ID}_32x32.png" "${ARTWORK_DIR}/${MOD_ID}_48x48.png" "${ARTWORK_DIR}/${MOD_ID}_256x256.png" "${BUILTDIR}/${MOD_ID}.ico"
-	install_windows_launcher "${SRCDIR}" "${BUILTDIR}" "win-${PLATFORM}" "${MOD_ID}" "${LAUNCHER_NAME}" "${DISPLAY_NAME}" "${FAQ_URL}"
+	TAG_TYPE="${TAG%%-*}"
+	TAG_VERSION="${TAG#*-}"
+	BACKWARDS_TAG="${TAG_VERSION}-${TAG_TYPE}"
 
+	convert "${ARTWORK_DIR}/${MOD_ID}_16x16.png" "${ARTWORK_DIR}/${MOD_ID}_24x24.png" "${ARTWORK_DIR}/${MOD_ID}_32x32.png" "${ARTWORK_DIR}/${MOD_ID}_48x48.png" "${ARTWORK_DIR}/${MOD_ID}_256x256.png" "${BUILTDIR}/${MOD_ID}.ico"
+	install_windows_launcher "${SRCDIR}" "${BUILTDIR}" "win-${PLATFORM}" "${MOD_ID}" "${LAUNCHER_NAME}" "${DISPLAY_NAME}" "${FAQ_URL}" "${TAG}"
+
+	# Use rcedit to patch the generated EXE with missing assembly/PortableExecutable information because .NET 6 ignores that when building on Linux.
+	# Using a backwards version tag because rcedit is unable to set versions starting with a letter.
+	wine64 rcedit-x64.exe "${BUILTDIR}/${LAUNCHER_NAME}.exe" --set-product-version "${BACKWARDS_TAG}"
+	wine64 rcedit-x64.exe "${BUILTDIR}/${LAUNCHER_NAME}.exe" --set-version-string "ProductName" "OpenRA"
+	wine64 rcedit-x64.exe "${BUILTDIR}/${LAUNCHER_NAME}.exe" --set-version-string "CompanyName" "The OpenRA team"
+	wine64 rcedit-x64.exe "${BUILTDIR}/${LAUNCHER_NAME}.exe" --set-version-string "FileDescription" "${LAUNCHER_NAME} mod for OpenRA"
+	wine64 rcedit-x64.exe "${BUILTDIR}/${LAUNCHER_NAME}.exe" --set-version-string "LegalCopyright" "Copyright (c) The OpenRA Developers and Contributors"
 	wine64 rcedit-x64.exe "${BUILTDIR}/${LAUNCHER_NAME}.exe" --set-icon "${BUILTDIR}/${MOD_ID}.ico"
 }
 
@@ -64,10 +75,10 @@ function build_platform()
 		USE_PROGRAMFILES32=""
 	fi
 
-	install_assemblies "${SRCDIR}" "${BUILTDIR}" "win-${PLATFORM}" "net6" "False" "True" "True"
+	install_assemblies "${SRCDIR}" "${BUILTDIR}" "win-${PLATFORM}" "False" "True" "True"
 	install_data "${SRCDIR}" "${BUILTDIR}" "cnc" "d2k" "ra"
 	set_engine_version "${TAG}" "${BUILTDIR}"
-	set_mod_version "${TAG}" "${BUILTDIR}/mods/cnc/mod.yaml" "${BUILTDIR}/mods/d2k/mod.yaml" "${BUILTDIR}/mods/ra/mod.yaml"  "${BUILTDIR}/mods/modcontent/mod.yaml"
+	set_mod_version "${TAG}" "${BUILTDIR}/mods/cnc/mod.yaml" "${BUILTDIR}/mods/d2k/mod.yaml" "${BUILTDIR}/mods/ra/mod.yaml" "${BUILTDIR}/mods/cnc-content/mod.yaml" "${BUILTDIR}/mods/d2k-content/mod.yaml" "${BUILTDIR}/mods/ra-content/mod.yaml"
 
 	echo "Compiling Windows launchers (${PLATFORM})"
 	makelauncher "RedAlert" "Red Alert" "ra" "${PLATFORM}"

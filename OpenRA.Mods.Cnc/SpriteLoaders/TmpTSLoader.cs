@@ -18,7 +18,7 @@ namespace OpenRA.Mods.Cnc.SpriteLoaders
 {
 	public class TmpTSLoader : ISpriteLoader
 	{
-		class TmpTSDepthFrame : ISpriteFrame
+		sealed class TmpTSDepthFrame : ISpriteFrame
 		{
 			readonly TmpTSFrame parent;
 
@@ -35,7 +35,7 @@ namespace OpenRA.Mods.Cnc.SpriteLoaders
 			}
 		}
 
-		class TmpTSFrame : ISpriteFrame
+		sealed class TmpTSFrame : ISpriteFrame
 		{
 			public SpriteFrameType Type => SpriteFrameType.Indexed8;
 			public Size Size { get; }
@@ -120,14 +120,13 @@ namespace OpenRA.Mods.Cnc.SpriteLoaders
 			for (var j = 0; j < size.Height; j++)
 			{
 				var start = (j - frameBounds.Y) * frameBounds.Width + (size.Width - width) / 2 - frameBounds.X;
-				for (var i = 0; i < width; i++)
-					data[start + i] = s.ReadUInt8();
+				s.ReadBytes(data, start, width);
 
 				width += (j < size.Height / 2 - 1 ? 1 : -1) * 4;
 			}
 		}
 
-		bool IsTmpTS(Stream s)
+		static bool IsTmpTS(Stream s)
 		{
 			var start = s.Position;
 			s.Position += 8;
@@ -152,7 +151,7 @@ namespace OpenRA.Mods.Cnc.SpriteLoaders
 			return test == sx * sy / 2 + 52;
 		}
 
-		ISpriteFrame[] ParseFrames(Stream s)
+		static ISpriteFrame[] ParseFrames(Stream s)
 		{
 			var start = s.Position;
 			var templateWidth = s.ReadUInt32();

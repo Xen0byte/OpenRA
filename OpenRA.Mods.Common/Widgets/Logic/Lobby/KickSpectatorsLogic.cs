@@ -14,15 +14,15 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
-	class KickSpectatorsLogic : ChromeLogic
+	sealed class KickSpectatorsLogic : ChromeLogic
 	{
-		[TranslationReference("count")]
+		[FluentReference("count")]
 		const string KickSpectators = "dialog-kick-spectators.prompt";
 
 		[ObjectCreator.UseCtor]
 		public KickSpectatorsLogic(Widget widget, int clientCount, Action okPressed, Action cancelPressed)
 		{
-			var kickMessage = TranslationProvider.GetString(KickSpectators, Translation.Arguments("count", clientCount));
+			var kickMessage = FluentProvider.GetMessage(KickSpectators, "count", clientCount);
 			widget.Get<LabelWidget>("TEXT").GetText = () => kickMessage;
 
 			widget.Get<ButtonWidget>("OK_BUTTON").OnClick = () =>

@@ -14,7 +14,7 @@ using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
 {
-	class GameInfoBriefingLogic : ChromeLogic
+	sealed class GameInfoBriefingLogic : ChromeLogic
 	{
 		[ObjectCreator.UseCtor]
 		public GameInfoBriefingLogic(Widget widget, ModData modData, World world)
@@ -30,7 +30,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (missionData != null)
 			{
 				var text = WidgetUtils.WrapText(missionData.Briefing?.Replace("\\n", "\n"), mapDescription.Bounds.Width, mapFont);
-				mapDescription.Text = text;
+				mapDescription.GetText = () => text;
 				mapDescription.Bounds.Height = mapFont.Measure(text).Y;
 				mapDescriptionPanel.ScrollToTop();
 				mapDescriptionPanel.Layout.AdjustChildren();

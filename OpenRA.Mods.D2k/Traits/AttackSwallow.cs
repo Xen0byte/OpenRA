@@ -21,7 +21,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.D2k.Traits
 {
 	[Desc("Sandworms use this attack model.")]
-	class AttackSwallowInfo : AttackFrontalInfo
+	sealed class AttackSwallowInfo : AttackFrontalInfo
 	{
 		[Desc("The number of ticks it takes to return underground.")]
 		public readonly int ReturnDelay = 60;
@@ -38,12 +38,13 @@ namespace OpenRA.Mods.D2k.Traits
 		[NotificationReference("Speech")]
 		public readonly string WormAttackNotification = "WormAttack";
 
-		public readonly string WormAttackTextNotification = "Worm attack.";
+		[FluentReference]
+		public readonly string WormAttackTextNotification = "notification-worm-attack";
 
 		public override object Create(ActorInitializer init) { return new AttackSwallow(init.Self, this); }
 	}
 
-	class AttackSwallow : AttackFrontal
+	sealed class AttackSwallow : AttackFrontal
 	{
 		public new readonly AttackSwallowInfo Info;
 
@@ -77,7 +78,7 @@ namespace OpenRA.Mods.D2k.Traits
 			return new SwallowTarget(self, newTarget, allowMove, forceAttack);
 		}
 
-		public class SwallowTarget : Attack
+		public sealed class SwallowTarget : Attack
 		{
 			public SwallowTarget(Actor self, in Target target, bool allowMovement, bool forceAttack)
 				: base(self, target, allowMovement, forceAttack) { }

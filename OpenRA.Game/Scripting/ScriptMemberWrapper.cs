@@ -50,7 +50,7 @@ namespace OpenRA.Scripting
 			try
 			{
 				if (!IsMethod)
-					throw new LuaException("Trying to invoke a ScriptMemberWrapper that isn't a method!");
+					throw new LuaException($"Trying to invoke a {nameof(ScriptMemberWrapper)} that isn't a method!");
 
 				var mi = (MethodInfo)Member;
 				var pi = mi.GetParameters();
@@ -125,8 +125,8 @@ namespace OpenRA.Scripting
 		public static IEnumerable<MemberInfo> WrappableMembers(Type t)
 		{
 			// Only expose defined public non-static methods that were explicitly declared by the author
-			var flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-			foreach (var mi in t.GetMembers(flags))
+			const BindingFlags Flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+			foreach (var mi in t.GetMembers(Flags))
 			{
 				// Properties are always wrappable
 				if (mi is PropertyInfo)
@@ -149,8 +149,8 @@ namespace OpenRA.Scripting
 
 			// Remove the namespace and the trailing "Info"
 			return types.SelectMany(i => i.GetGenericArguments())
-				.Select(g => g.Name.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault())
-				.Select(s => s.EndsWith("Info") ? s.Remove(s.Length - 4, 4) : s)
+				.Select(g => g.Name.Split('.', StringSplitOptions.RemoveEmptyEntries).LastOrDefault())
+				.Select(s => s.EndsWith("Info", StringComparison.Ordinal) ? s.Remove(s.Length - 4, 4) : s)
 				.ToArray();
 		}
 	}

@@ -107,16 +107,15 @@ namespace OpenRA.Mods.Common.Widgets
 
 			if (mi.Button == MouseButton.Left && mi.Event == MouseInputEvent.Up)
 			{
-				if (useClassicMouseStyle && HasMouseFocus)
+				if (useClassicMouseStyle && HasMouseFocus &&
+					!IsValidDragbox && World.Selection.Actors.Count != 0 &&
+					!multiClick && uog.InputOverridesSelection(World, mousePos, mi))
 				{
-					if (!IsValidDragbox && World.Selection.Actors.Any() && !multiClick && uog.InputOverridesSelection(World, mousePos, mi))
-					{
-						// Order units instead of selecting
-						ApplyOrders(World, mi);
-						isDragging = false;
-						YieldMouseFocus(mi);
-						return true;
-					}
+					// Order units instead of selecting
+					ApplyOrders(World, mi);
+					isDragging = false;
+					YieldMouseFocus(mi);
+					return true;
 				}
 
 				if (multiClick)
@@ -198,7 +197,7 @@ namespace OpenRA.Mods.Common.Widgets
 					var visualTarget = o.VisualFeedbackTarget.Type != TargetType.Invalid ? o.VisualFeedbackTarget : o.Target;
 
 					foreach (var notifyOrderIssued in world.WorldActor.TraitsImplementing<INotifyOrderIssued>())
-						flashed = notifyOrderIssued.OrderIssued(world, visualTarget);
+						flashed = notifyOrderIssued.OrderIssued(world, o.OrderString, visualTarget);
 				}
 
 				world.IssueOrder(o);

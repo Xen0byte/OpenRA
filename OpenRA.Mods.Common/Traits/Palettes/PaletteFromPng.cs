@@ -20,7 +20,7 @@ namespace OpenRA.Mods.Common.Traits
 {
 	[TraitLocation(SystemActors.World | SystemActors.EditorWorld)]
 	[Desc("Load a PNG and use its embedded palette.")]
-	class PaletteFromPngInfo : TraitInfo, ITilesetSpecificPaletteInfo, IProvidesCursorPaletteInfo
+	sealed class PaletteFromPngInfo : TraitInfo, ITilesetSpecificPaletteInfo, IProvidesCursorPaletteInfo
 	{
 		[PaletteDefinition]
 		[FieldLoader.Require]
@@ -58,13 +58,13 @@ namespace OpenRA.Mods.Common.Traits
 			var colors = new uint[Palette.Size];
 
 			for (var i = 0; i < png.Palette.Length; i++)
-				colors[i] = (uint)png.Palette[i].ToArgb();
+				colors[i] = png.Palette[i].ToArgb();
 
 			return new ImmutablePalette(colors);
 		}
 	}
 
-	class PaletteFromPng : ILoadsPalettes, IProvidesAssetBrowserPalettes
+	sealed class PaletteFromPng : ILoadsPalettes, IProvidesAssetBrowserPalettes
 	{
 		readonly World world;
 		readonly PaletteFromPngInfo info;
